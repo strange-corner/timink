@@ -86,7 +86,8 @@ class WrapLabel(Gtk.Label):
         if str != None:
             self.set_text(str)
 
-        self.set_alignment(0.0, 0.0)
+        self.halign = 0.0
+        self.valign = 0.0
 
     def do_size_request(self, requisition):
         layout = self.get_layout()
@@ -210,7 +211,7 @@ class SignalClusterEditor(object):
         signalClusterSpecScroll.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC)
         signalClusterSpecTextView = Gtk.TextView()
         signalClusterSpecTextView.set_accepts_tab(False)
-        signalClusterSpecTextView.modify_font(Pango.FontDescription(u'monospace'))
+        signalClusterSpecTextView.font = Pango.FontDescription(u'monospace')
         signalClusterSpecTextView.set_tooltip_text(
             u'Signal cluster specification.\n' +
              'Each line containing at least one state character ("0", "1", "-", "x", "X" etc.) ' +
@@ -224,8 +225,9 @@ class SignalClusterEditor(object):
             label='01010101 00110011 000111000111 00001111\n' +
                   'xXxXxXxX xxXXxxXX xxxXXXxxxXXX xxxxXXXX\n' +
                   '0[X]1    0[XXxx]- 0(1001)(1010)-')
-        exampleLabel.modify_font(Pango.FontDescription(u'monospace'))
-        exampleLabel.set_alignment(0.0, 0.0)
+        exampleLabel.font = Pango.FontDescription(u'monospace')
+        exampleLabel.halign = 0.0
+        exampleLabel.valign = 0.0
         exampleLabel.set_selectable(True)
         exampleLabel.show()
         exampleFrame = Gtk.Frame()
@@ -248,16 +250,17 @@ class SignalClusterEditor(object):
         return signalClusterSpecPageVBox
 
     def _createLayoutPage(self):
-        table = Gtk.Table(n_rows=3, n_columns=3, homogeneous=False)
+        table = Gtk.Grid()
         table.set_border_width(6)
-        table.set_col_spacing(column=0, spacing=12)
+        #table.set_col_spacing(column=0, spacing=12)
         table.show()
 
         def appendToTable(table, labelStr, editor, startRow):
             label = Gtk.Label(label=labelStr)
-            label.set_alignment(1.0, 0.0)
-            table.attach(label, 0, 1, startRow, startRow + 1, yoptions=0)
-            table.attach(editor.getWidget(), 1, 2, startRow, startRow + 1, yoptions=0)
+            label.halign = 1.0
+            label.valign = 0.0
+            table.attach(label, 0, startRow, 1, 1)
+            table.attach(editor.getWidget(), 1, startRow, 1, 1)
 
         editor = LengthEditor(
             initialValueStr=self.usrParams.unitTimeWidth,
@@ -297,8 +300,8 @@ class SignalClusterEditor(object):
         placmHomogRadioButton = Gtk.RadioButton(group=placmIndivRadioButton, label='homogeneous')
         self.placmHomogRadioButton = placmHomogRadioButton
 
-        table = Gtk.Table(n_rows=2, n_columns=3, homogeneous=False)
-        table.set_col_spacing(column=0, spacing=12)
+        table = Gtk.Grid()
+        #deprecated table.set_col_spacing(column=0, spacing=12)
 
         editor = LengthEditor(
             initialValueStr=self.usrParams.originDistX,
@@ -315,7 +318,7 @@ class SignalClusterEditor(object):
         self.originDistYEditor = editor
 
         tableAlignm = Gtk.Alignment(xalign=0.0, yalign=0.0, xscale=1.0, yscale=1.0)
-        tableAlignm.set_padding(padding_top=0, padding_bottom=6, padding_left=24, padding_right=6)
+        # deprecated: tableAlignm.set_padding(padding_top=0, padding_bottom=6, padding_left=24, padding_right=6)
         tableAlignm.add(table)
         placmHomogVBox = Gtk.VBox()
         placmHomogVBox.pack_start(placmHomogRadioButton, False, False, 0)
@@ -359,11 +362,12 @@ class SignalClusterEditor(object):
         warningHBox = Gtk.HBox()
         warningHBox.set_border_width(6)
         warningHBox.set_spacing(12)
-        icon = Gtk.Image()
-        icon.set_from_stock(Gtk.STOCK_DIALOG_WARNING, Gtk.IconSize.MENU)
-        icon.set_alignment(0.0, 0.5)
+        icon = Gtk.Image.new_from_icon_name("dialog-warning", Gtk.IconSize.LARGE_TOOLBAR)
+        icon.halign = 0.0
+        icon.valign = 0.5
         textLabel = WrapLabel(labelStr)
-        textLabel.set_alignment(0.0, 0.5)
+        textLabel.halign = 0.0
+        textLabel.valign = 0.5
         textLabel.set_line_wrap(True)
         warningHBox.pack_start(icon, False, False, 0)
         warningHBox.pack_start(textLabel, True, True, 0)
@@ -425,7 +429,7 @@ class SignalClusterEditor(object):
         """
 
         dlgTitle = u'{title} {version}'.format(title=EXTENSION_TITLE, version=VERSIONJOINT.extension)
-        dlg = Gtk.Dialog(dlgTitle, None, modal=True, destroy_with_parent=True) # ???
+        dlg = Gtk.Dialog(title=dlgTitle, transient_for=None, modal=True, destroy_with_parent=True) # ???
         dlg.add_button(Gtk.STOCK_CANCEL, Gtk.ResponseType.REJECT)
         if self.isNew:
             newButton = dlg.add_button(Gtk.STOCK_NEW, Gtk.ResponseType.ACCEPT)
@@ -456,8 +460,19 @@ class SignalClusterEditor(object):
         # set default dialog size based on screen size and natural dialog size
         targetWidthToHeightRatio = 1.1
         screen = dlg.get_screen()
-        screenWidth = screen.get_width()
-        screenHeight = screen.get_height()
+
+        # get screen width and height (https://stackoverflow.com/a/65892480/603939)
+        display = screen.get_display()  
+        mon_geoms = [
+            display.get_primary_monitor().get_geometry()
+        ]
+        x0 = min(r.x            for r in mon_geoms)
+        y0 = min(r.y            for r in mon_geoms)
+        x1 = max(r.x + r.width  for r in mon_geoms)
+        y1 = max(r.y + r.height for r in mon_geoms)
+        screenWidth = x1 - x0
+        screenHeight = y1 - y0
+
         naturalWidth, naturalHeight = dlg.get_size()
         width = max(min(screenWidth // 3, 3 * naturalWidth), naturalWidth)
         height = max(min(screenHeight // 3, 3 * naturalHeight), naturalHeight)

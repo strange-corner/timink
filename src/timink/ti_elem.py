@@ -252,7 +252,7 @@ class Elem:
     def removeStroke(self):
         assert self._node is not None
         didChange = False
-        styleDict = simplestyle.parseStyle(self._node.attrib.get('style', None))
+        styleDict =  dict(inkex.Style.parse_str(self._node.attrib.get('style', None)))
         if styleDict.get('stroke', 'black') != 'none':
             styleDict['stroke'] = 'none'
             didChange = True
@@ -264,13 +264,13 @@ class Elem:
             if propertyName in styleDict:
                 del styleDict[propertyName]
                 didChange = True
-        self._node.attrib['style'] = simplestyle.formatStyle(styleDict)
+        self._node.attrib['style'] = str(inkex.Style(styleDict))
         return didChange
 
     def removeFill(self):
         assert self._node is not None
         didChange = False
-        styleDict = simplestyle.parseStyle(self._node.attrib.get('style', None))
+        styleDict =  dict(inkex.Style.parse_str(self._node.attrib.get('style', None)))
         if styleDict.get('fill', 'black') != 'none':
             styleDict['fill'] = 'none'
             didChange = True
@@ -278,13 +278,13 @@ class Elem:
             if propertyName in styleDict:
                 del styleDict[propertyName]
                 didChange = True
-        self._node.attrib['style'] = simplestyle.formatStyle(styleDict)
+        self._node.attrib['style'] = str(inkex.Style(styleDict))
         return didChange
 
     def forceVisibleStroke(self):
         assert self._node is not None
         didChange = False
-        styleDict = simplestyle.parseStyle(self._node.attrib.get('style', None))
+        styleDict =  dict(inkex.Style.parse_str(self._node.attrib.get('style', None)))
         if styleDict.get('stroke', 'none') == 'none':
             styleDict['stroke'] = 'black'
             didChange = True
@@ -293,7 +293,7 @@ class Elem:
         if width is None or width == 0.0:
             styleDict['stroke-width'] = '1.0'
             didChange = True
-        self._node.attrib['style'] = simplestyle.formatStyle(styleDict)
+        self._node.attrib['style'] = str(inkex.Style(styleDict))
         return didChange
 
     @staticmethod
@@ -431,7 +431,7 @@ class PathElem(Elem):
         del pathSpecs
 
         attribs = {
-            'style': simplestyle.formatStyle(styleDict),
+            'style': str(inkex.Style(styleDict)),
             'd':     pathSpec
         }
         return PathElem(etree.SubElement(parentNode, inkex.addNS('path','svg'), attribs))
