@@ -42,7 +42,16 @@ class Version(object):
         return str(self)
 
     def __lt__(self, other):
-        return True
+        if self.__eq__(other):
+            return other.appendix is None and self.appendix is not None or \
+                other.appendix is not None and self.appendix is not None and Version._parseAppenix(self.appendix) <  Version._parseAppenix(other.appendix)
+        else:
+            return self.components < other.components
+
+    def __eq__(self, other):
+        return other.components == self.components
+
+    def __cmp__(self, other):
         d = cmp(self.components, other.components)
         if d == 0:
             if self.appendix is None and other.appendix is not None:
@@ -65,7 +74,6 @@ class Version(object):
 
     @staticmethod
     def testIt():
-        return
         v = Version('1.2.3a3')
         assert v.components == (1, 2, 3)
         assert v.appendix == 'a3'
@@ -100,6 +108,12 @@ class VersionJoint(object):
         self.extension = VersionExtension(versionTokens[0])
         self.model = VersionModel(versionTokens[1])
 
+    def __lt__(self, other):
+        return (self.extension, self.model) < (other.extension, other.model)
+
+    def __eq__(self, other):
+        return (self.extension, self.model) == (other.extension, other.model)
+
     def __cmp__(self, other):
         return cmp((self.extension, self.model), (other.extension, other.model))
 
@@ -111,7 +125,6 @@ class VersionJoint(object):
 
     @staticmethod
     def testIt():
-        return
         assert VersionJoint('0.0.1/0.0') == VersionJoint('0.0.1/0.0')
         assert VersionJoint('0.0.1/0.0') != VersionJoint('0.0.1/0.1')
         assert VersionJoint('0.0.2/0.0') > VersionJoint('0.0.1/0.0')
