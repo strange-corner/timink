@@ -211,7 +211,7 @@ class SignalClusterEditor(object):
         signalClusterSpecScroll.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC)
         signalClusterSpecTextView = Gtk.TextView()
         signalClusterSpecTextView.set_accepts_tab(False)
-        signalClusterSpecTextView.font = Pango.FontDescription(u'monospace')
+        signalClusterSpecTextView.set_monospace(True)
         signalClusterSpecTextView.set_tooltip_text(
             u'Signal cluster specification.\n' +
              'Each line containing at least one state character ("0", "1", "-", "x", "X" etc.) ' +
@@ -221,11 +221,11 @@ class SignalClusterEditor(object):
         signalClusterSpecTextView.show()
         signalClusterSpecScroll.show()
 
-        exampleLabel = Gtk.Label(
-            label='01010101 00110011 000111000111 00001111\n' +
-                  'xXxXxXxX xxXXxxXX xxxXXXxxxXXX xxxxXXXX\n' +
-                  '0[X]1    0[XXxx]- 0(1001)(1010)-')
-        exampleLabel.font = Pango.FontDescription(u'monospace')
+        exampleLabel = Gtk.Label()
+        labelText = '01010101 00110011 000111000111 00001111\n' \
+                    'xXxXxXxX xxXXxxXX xxxXXXxxxXXX xxxxXXXX\n' \
+                    '0[X]1    0[XXxx]- 0(1001)(1010)-'
+        exampleLabel.set_markup('<span font_desc="mono">' + labelText + '</span>')
         exampleLabel.halign = 0.0
         exampleLabel.valign = 0.0
         exampleLabel.set_selectable(True)

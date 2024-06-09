@@ -6,6 +6,6 @@
     <object-type>all</object-type>
   </effect>
   <script>
-    <command interpreter="python">timink/timink.py</command>
+    <command location="inx" interpreter="python">timink/timink.py</command>
   </script>
 </inkscape-extension>

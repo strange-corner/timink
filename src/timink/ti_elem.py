@@ -237,8 +237,8 @@ class Elem:
         assert self._node is not None
         assert cmpNode is not None
         key = 'style'
-        style = simplestyle.parseStyle(self._node.attrib.get(key, None))
-        cmpStyle = simplestyle.parseStyle(cmpNode.attrib.get(key, None))
+        style = dict(inkex.Style.parse_str(self._node.attrib.get(key, None)))
+        cmpStyle = dict(inkex.Style.parse_str(cmpNode.attrib.get(key, None)))
         return style == cmpStyle
 
     def removeStyle(self):
